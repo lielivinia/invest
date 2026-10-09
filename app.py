@@ -108,7 +108,7 @@ if not summary_df.empty:
     st.markdown("---")
     
     # Run the bulk metrics through the live Gemini API
-    st.subheader("🧠 Bob AI Daily Action Briefing")
+    st.subheader("🧠 Gemini AI Daily Action Briefing")
     with st.spinner("Synthesizing daily recommendations with Google Gemini AI..."):
         daily_briefing = fetch_daily_bulk_insight(summary_df, ai_risk_profile)
         
