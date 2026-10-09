@@ -3,6 +3,8 @@ import yfinance as yf
 import pandas as pd
 import ta
 from google import genai
+from datetime import datetime
+import pytz
 
 # ==========================================
 # 1. CORE WEBSITE CONFIGURATION
@@ -16,7 +18,7 @@ st.sidebar.header("⚙️ Scanner & Budget Settings")
 market_selection = st.sidebar.selectbox("Choose Watchlist:", ["Singapore Blue Chips & ETFs", "US Large-Cap Tech"])
 ai_risk_profile = st.sidebar.select_slider("AI Risk Sensitivity:", options=["Conservative", "Balanced", "Aggressive"])
 
-# New Budget Input Elements
+# Budget Input Elements
 total_budget = st.sidebar.number_input("Total Investment Budget ($):", min_value=100, max_value=100000, value=2000, step=100)
 cash_buffer_pct = st.sidebar.slider("Emergency Cash Buffer (%):", min_value=0, max_value=50, value=10, step=5)
 
@@ -33,7 +35,8 @@ WATCHLISTS = {
 # ==========================================
 # 2. BULK DATA SCANNER ENGINE
 # ==========================================
-@st.cache_data(ttl=3600)
+# 🌟 SAFE CACHE STRATEGY: Data holds in memory for 10 minutes (600 seconds) to prevent Yahoo spam blocks
+@st.cache_data(ttl=600)
 def scan_markets(tickers):
     scan_results = []
     for ticker in tickers:
@@ -58,15 +61,17 @@ def scan_markets(tickers):
                 })
         except Exception:
             pass
-    return pd.DataFrame(scan_results)
+            
+    # ⏱️ TIMESTAMP CREATION: Record the exact data fetch moment inside the Asia/Singapore timezone
+    sg_tz = pytz.timezone('Asia/Singapore')
+    timestamp = datetime.now(sg_tz).strftime("%Y-%m-%d %I:%M:%S %p SGT")
+    
+    return pd.DataFrame(scan_results), timestamp
 
 # ==========================================
 # 3. LIVE BUDGET-AWARE AI GENERATION
 # ==========================================
 def fetch_budget_ai_insight(df_summary, risk_setting, cash_pool):
-    """
-    Passes market data along with the user's explicit deployable cash budget to Gemini.
-    """
     try:
         api_key = st.secrets["GEMINI_API_KEY"]
         client = genai.Client(api_key=api_key)
@@ -108,20 +113,28 @@ c2.metric("Safety Cash Buffer", f"${buffer_amount:,.2f} ({cash_buffer_pct}%)")
 c3.metric("Net Deployable Capital", f"${deployable_cash:,.2f}", delta="Ready to Invest", delta_color="inverse")
 
 with st.spinner("Scanning market metrics..."):
-    summary_df = scan_markets(selected_tickers)
+    summary_df, last_updated_time = scan_markets(selected_tickers)
 
 if not summary_df.empty:
     st.markdown("---")
-    st.subheader(f"静态 Snapshot Matrix: {market_selection}")
+    
+    # Render the Snapshot header block side-by-side with your new timestamp label
+    col_title, col_time = st.columns(2)
+    with col_title:
+        st.subheader(f"📊 Snapshot Matrix: {market_selection}")
+    with col_time:
+        st.markdown(f"<p style='text-align: right; color: gray; padding-top: 10px;'>⏱️ <b>Data Cached At:</b> {last_updated_time}</p>", unsafe_allow_html=True)
+        
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
     
     st.markdown("---")
     st.subheader("🧠 Gemini AI Personalized Capital Directive")
     
-    # Clean, correctly indented action block
     if st.button("🚀 Generate AI Allocation Report", use_container_width=True):
         with st.spinner("Calculating mathematical allocations with Gemini AI..."):
             budget_briefing = fetch_budget_ai_insight(summary_df, ai_risk_profile, deployable_cash)
         st.markdown(budget_briefing)
     else:
         st.info("💡 Adjust your budget and settings in the sidebar, then click the button above to view your personalized AI advice.")
+else:
+    st.error("Failed to load trading vectors.")
