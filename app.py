@@ -93,7 +93,7 @@ def fetch_budget_ai_insight(df_summary, risk_setting, cash_pool):
         """
         
         response = client.models.generate_content(
-            model='gemini-3.8-flash',
+            model='gemini-3.5-flash-lite',
             contents=prompt,
         )
         return response.text
