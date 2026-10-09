@@ -85,7 +85,7 @@ if ticker_input:
             }
             
             # Layout Setup for Dashboard Web View
-            col1, col2 = st.columns()
+            col1, col2 = st.columns(2)
             
             with col1:
                 st.subheader(f"📈 Historical Trend Chart: {ticker_input}")
