@@ -116,7 +116,7 @@ if not summary_df.empty:
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
     
     st.markdown("---")
-    st.subheader("🧠 Bob AI Personalized Capital Directive")
+    st.subheader("🧠 Gemini AI Personalized Capital Directive")
     
     # Clean, correctly indented action block
     if st.button("🚀 Generate AI Allocation Report", use_container_width=True):
