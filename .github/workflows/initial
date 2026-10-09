@@ -1,0 +1,13 @@
+# 1. Turn your local folder into an official Git repository
+git init -b main
+
+# 2. Create a standard layout file detailing how to run your web app
+echo "# Personal AI Investment Web App" > README.md
+echo "Built using Python, Streamlit, yfinance, and free LLM parsing logic." >> README.md
+
+# 3. Create a strict .gitignore file to prevent system clutter from entering your repo
+echo "__pycache__/" > .gitignore
+echo ".pytest_cache/" >> .gitignore
+echo "*.pyc" >> .gitignore
+echo ".env" >> .gitignore
+echo ".streamlit/" >> .gitignore
