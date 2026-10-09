@@ -115,15 +115,13 @@ if not summary_df.empty:
     st.subheader(f"静态 Snapshot Matrix: {market_selection}")
     st.dataframe(summary_df, use_container_width=True, hide_index=True)
     
-       st.markdown("---")
+    st.markdown("---")
     st.subheader("🧠 Bob AI Personalized Capital Directive")
     
-    # 🌟 NEW ADDITION: A protective button control to stop accidental rate limit spamming
+    # Clean, correctly indented action block
     if st.button("🚀 Generate AI Allocation Report", use_container_width=True):
         with st.spinner("Calculating mathematical allocations with Gemini AI..."):
             budget_briefing = fetch_budget_ai_insight(summary_df, ai_risk_profile, deployable_cash)
-            
         st.markdown(budget_briefing)
     else:
         st.info("💡 Adjust your budget and settings in the sidebar, then click the button above to view your personalized AI advice.")
-
